@@ -359,14 +359,31 @@ let decide (formula: string) : unit =
   try
     let lexbuf = Lexing.from_string formula in
     let formula = parse_exn DecideParser.formula_main lexbuf "" in
-    (* TODO(mwhittaker). This doesn't handle formulas with <= in them
-     * correctly. See test_lib/Test_Decide.ml for the correct behavior. *)
-    let lhs, rhs = DecideAst.Formula.terms formula in
+    let lhs, rhs =
+      match formula with
+      | Eq (lhs, rhs) -> (lhs, rhs)
+      | Le (lhs, rhs) -> DecideAst.(Term.plus (TermSet.of_list [lhs; rhs]), rhs)
+    in
     ignore (DecideUtil.set_univ DecideAst.([Term.values lhs; Term.values rhs]));
     printf "%b\n%!" (Frenetic_Decide_Bisimulation.check_equivalent lhs rhs)
   with
   | ParseError (filename, line, char, token) ->
       printf "Parse error %s:%d%d: %s\n%!" filename line char token
+
+let measure (formula: string) : unit =
+  try
+    let lexbuf = Lexing.from_string formula in
+    let formula = parse_exn DecideParser.formula_main lexbuf "" in
+    let lhs, rhs =
+      match formula with
+      | Eq (lhs, rhs) -> (lhs, rhs)
+      | Le (lhs, rhs) -> DecideAst.(Term.plus (TermSet.of_list [lhs; rhs]), rhs)
+    in
+    printf "%n\n%!" (DecideAst.Term.size lhs + DecideAst.Term.size rhs + 1)
+  with
+  | ParseError (filename, line, char, token) ->
+      printf "Parse error %s:%d%d: %s\n%!" filename line char token
+
 
 (* A reference to the current policy and the associated string. *)
 let policy : (policy * string) ref = ref (drop, "drop")

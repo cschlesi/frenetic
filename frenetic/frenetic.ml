@@ -103,6 +103,30 @@ let shell : Command.t =
     (fun openflow_port ->
       run (Frenetic_Shell.main openflow_port))
 
+let decide : Command.t =
+  Command.basic
+    ~summary:"Invokes decision procedure."
+    Command.Spec.(empty
+      +> Flag.policy_file
+      ++ default_spec)
+    (fun policy_file ->
+      let pol_str = In_channel.read_all policy_file in
+      run (fun _ ->
+	 Frenetic_Shell.decide pol_str;
+	 Async.Std.Shutdown.shutdown 0))
+
+let measure : Command.t =
+  Command.basic
+    ~summary:"Invokes decision procedure."
+    Command.Spec.(empty
+      +> Flag.policy_file
+      ++ default_spec)
+    (fun policy_file ->
+      let pol_str = In_channel.read_all policy_file in
+      run (fun _ ->
+	 Frenetic_Shell.measure pol_str;
+	 Async.Std.Shutdown.shutdown 0))
+
 let compile_server : Command.t =
   Command.basic
     ~summary:"Invokes compile server."
@@ -149,6 +173,8 @@ let main : Command.t =
   Command.group
     ~summary:"Invokes the specified Frenetic module."
     [ ("shell", shell)
+    ; ("decide", decide)
+    ; ("measure", measure)
     ; ("compile-server", compile_server)
     ; ("http-controller", http_controller)
     ; ("openflow13", openflow13_controller)
