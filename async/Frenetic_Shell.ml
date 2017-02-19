@@ -379,7 +379,7 @@ let measure (formula: string) : unit =
       | Eq (lhs, rhs) -> (lhs, rhs)
       | Le (lhs, rhs) -> DecideAst.(Term.plus (TermSet.of_list [lhs; rhs]), rhs)
     in
-    printf "%n\n%!" (DecideAst.Term.size lhs + DecideAst.Term.size rhs + 1)
+    printf "%n\n%!" (DecideAst.Term.size lhs)
   with
   | ParseError (filename, line, char, token) ->
       printf "Parse error %s:%d%d: %s\n%!" filename line char token
